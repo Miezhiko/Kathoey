@@ -38,8 +38,8 @@ impl Kathoey {
     let mut word: &str = "";
     let mut mbfem: &str = "";
     let mut femfem: &str = "";
-    let mut origfem = false;
     let mut verb = false;
+    let mut other = vec![];
     for token in xmlparser::Tokenizer::from(text.as_str()) {
       let t = token?;
       match t {
@@ -69,7 +69,8 @@ impl Kathoey {
               if value.as_str() == "VERB" {
                 verb = true;
               } else if value.as_str() == "femn" {
-                origfem = true;
+                femfem = word;
+                lfem = true;
               }
             }
           } else if fword {
@@ -80,6 +81,7 @@ impl Kathoey {
               }
             if local.as_str() == "t" {
               mbfem = value.as_str();
+              other.push(mbfem);
             }
           }
         },
@@ -98,17 +100,28 @@ impl Kathoey {
               } else if lword {
                 lword = false;
               } else if lemma {
-                if lfem && !origfem {
-                  map.insert(
-                    word.to_string(),
-                    Dict { fem: femfem.to_string()
-                        , verb }
-                  );
+                if lfem {
+                  if word != femfem {
+                    map.insert(
+                      word.to_string(),
+                      Dict { fem: femfem.to_string()
+                          , verb }
+                    );
+                  }
+                  for w in other.iter() {
+                    if *w != femfem {
+                      map.insert(
+                        w.to_string(),
+                        Dict { fem: femfem.to_string()
+                            , verb }
+                      );
+                    }
+                  }
                 }
                 lemma = false;
                 verb = false;
                 lfem = false;
-                origfem = false;
+                other.clear();
               }
             }
           }
@@ -124,7 +137,7 @@ impl Kathoey {
                       , string: &str
                       , extreme: bool ) -> Option<String> {
     let dict = self.map.get(string)?;
-    if !extreme && dict.verb {
+    if extreme || dict.verb {
       Some( dict.fem.clone() )
     } else {
       None
@@ -168,15 +181,21 @@ impl Kathoey {
 mod tests {
   use super::*;
   #[test]
-  #[ignore = "ignored after dict.rs generation"]
+  //#[ignore = "ignored after dict.rs generation"]
   fn from_csv() -> Result<()> {
     match Kathoey::new("dict.opcorpora.xml") {
       Ok(k) => {
-        /* k.print_this(); */
+        assert_eq!("Я сделала это", k.feminize("Я сделал это"));
+        assert_eq!("Я потеряла ключи", k.feminize("Я потерял ключи"));
+        assert_eq!("Я не хотела этою говорить на случай, если ты увидишь.",
+          k.extreme_feminize("Я не хотел этого говорить на случай, если ты увидишь."));
+        // Optional: exporting
+        /*
         if let Err(exerr) = k.save("dict.rs") {
           return
             Err(eyre!("Failed to export {:?}", exerr));
         }
+        */
       }
       Err(kerr) => {
         return
@@ -186,11 +205,14 @@ mod tests {
     Ok(())
   }
   #[test]
+  #[ignore = "enable after perfomance improvements"]
   fn from_rudano() -> Result<()> {
     match Kathoey::from_rs("dict.rs") {
       Ok(k) => {
         assert_eq!("Я сделала это", k.feminize("Я сделал это"));
         assert_eq!("Я потеряла ключи", k.feminize("Я потерял ключи"));
+        assert_eq!("Я не хотела этого говорить на случай, если ты увидишь.",
+          k.feminize("Я не хотел этого говорить на случай, если ты увидишь."));
       }
       Err(kerr) => {
         return

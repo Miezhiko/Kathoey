@@ -4,7 +4,7 @@ Rust library for text feminization
  - currently using Russian from http://opencorpora.org
  - using xmlparser for [perfomance](https://github.com/RazrFalcon/roxmltree#performance)
  - exporting processed xmlparser map to rudano format
- - use from_rudano for speed up (10s vs 55s)
+ - use from_rudano for speed up (but right now it's working slower than XML -_-')
  - two modes (extreme and regular)
 
 # Usage
