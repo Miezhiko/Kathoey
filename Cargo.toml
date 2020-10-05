@@ -1,17 +1,17 @@
 [package]
-name = "kathoey"
-version = "0.0.1"
+name        = "kathoey"
+version     = "0.0.2"
 description = "Rust library for text feminization using open corpus linguistics data"
-authors = [ "Qeenon" ]
-license = "ISC"
-keywords = [ "russian" ]
-repository = "https://github.com/Qeenon/Kathoey"
-readme = "README.md"
+authors     = [ "Qeenon" ]
+license     = "ISC"
+keywords    = [ "russian" ]
+repository  = "https://github.com/Qeenon/Kathoey"
+readme      = "README.md"
 edition     = "2018"
 
 [dependencies]
-xmlparser = "0.13.3"
-eyre = "0.6.1"
-rudano = "0.1.0"
-serde = "1.0.116"
-serde_derive = "1.0.116"
+xmlparser     = "0.13.3"
+eyre          = "0.6.1"
+rudano        = "0.1.0"
+serde         = "1.0.116"
+serde_derive  = "1.0.116"

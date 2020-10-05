@@ -120,19 +120,33 @@ impl Kathoey {
       map
     })
   }
-  pub fn feminize_word(&self, string: &str) -> Option<String> {
+  pub fn feminize_word( &self
+                      , string: &str
+                      , extreme: bool ) -> Option<String> {
     let dict = self.map.get(string)?;
-    if dict.verb {
+    if !extreme && dict.verb {
       Some( dict.fem.clone() )
     } else {
       None
     }
   }
-  pub fn feminize(&self, string: &str) -> String {
+  pub fn feminize( &self
+                 , string: &str ) -> String {
     let words: Vec<&str> = string.split_whitespace().collect();
     let mut out = string.to_string();
     for word in words {
-      if let Some(fw) = self.feminize_word(word) {
+      if let Some(fw) = self.feminize_word(word, false) {
+        out = out.replace(word, &fw);
+      }
+    }
+    out
+  }
+  pub fn extreme_feminize( &self
+                 , string: &str ) -> String {
+    let words: Vec<&str> = string.split_whitespace().collect();
+    let mut out = string.to_string();
+    for word in words {
+      if let Some(fw) = self.feminize_word(word, true) {
         out = out.replace(word, &fw);
       }
     }
@@ -175,7 +189,6 @@ mod tests {
   fn from_rudano() -> Result<()> {
     match Kathoey::from_rs("dict.rs") {
       Ok(k) => {
-        // k.print_this();
         assert_eq!("Я сделала это", k.feminize("Я сделал это"));
         assert_eq!("Я потеряла ключи", k.feminize("Я потерял ключи"));
       }
