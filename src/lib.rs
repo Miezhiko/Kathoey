@@ -8,26 +8,25 @@ use std::collections::HashMap;
 use eyre::Result;
 
 #[derive(Serialize, Deserialize)]
-struct Dict where {
-  fem: String,
+struct Fem where {
+  fem: usize,
   verb: bool
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Kathoey where {
-  map: HashMap<String, Dict>
+  dict: Vec<String>,
+  map: HashMap<String, Fem>
 }
 
 impl Kathoey {
-  pub fn from_rs(dict: &str) -> Result<Kathoey> {
-    let contents = std::fs::read_to_string(dict)?;
-    let map = rudano::from_str(&contents)?;
-    Ok(Kathoey {
-      map
-    })
+  pub fn from_rs(rudano: &str) -> Result<Kathoey> {
+    let contents = std::fs::read_to_string(rudano)?;
+    let k = rudano::from_str(&contents)?;
+    Ok(k)
   }
-  pub fn new(dict: &str) -> Result<Kathoey> {
-    let text = std::fs::read_to_string(dict)?;
+  pub fn new(csv: &str) -> Result<Kathoey> {
+    let text = std::fs::read_to_string(csv)?;
     let mut map = HashMap::new();
     let mut lemma = false;
     let mut lword = false;
@@ -40,6 +39,9 @@ impl Kathoey {
     let mut femfem: &str = "";
     let mut verb = false;
     let mut other = vec![];
+    let mut dict = vec![];
+    let mut temp_dict: HashMap<&str, usize> = HashMap::new();
+    let mut fem_index : usize = 0;
     for token in xmlparser::Tokenizer::from(text.as_str()) {
       let t = token?;
       match t {
@@ -100,11 +102,21 @@ impl Kathoey {
               } else if lword {
                 lword = false;
               } else if lemma {
+                let fem_index =
+                  if let Some(i) = temp_dict.get(femfem) {
+                    *i
+                  } else {
+                    let i = fem_index;
+                    temp_dict.insert(femfem, i);
+                    dict.push(femfem.to_string());
+                    fem_index += 1;
+                    i
+                  };
                 if lfem {
                   if word != femfem {
                     map.insert(
                       word.to_string(),
-                      Dict { fem: femfem.to_string()
+                      Fem { fem: fem_index
                           , verb }
                     );
                   }
@@ -112,7 +124,7 @@ impl Kathoey {
                     if *w != femfem {
                       map.insert(
                         w.to_string(),
-                        Dict { fem: femfem.to_string()
+                        Fem { fem: fem_index
                             , verb }
                       );
                     }
@@ -130,18 +142,19 @@ impl Kathoey {
       }
     }
     Ok(Kathoey {
-      map
+      dict, map
     })
   }
   pub fn feminize_word( &self
                       , string: &str
                       , extreme: bool ) -> Option<String> {
-    let dict = self.map.get(string)?;
-    if extreme || dict.verb {
-      Some( dict.fem.clone() )
-    } else {
-      None
-    }
+    let f = self.map.get(string)?;
+    if extreme || f.verb {
+      if f.fem < self.dict.len() {
+        let fem = self.dict[f.fem].clone();
+        Some( fem )
+      } else { None }
+    } else { None }
   }
   pub fn feminize( &self
                  , string: &str ) -> String {
@@ -171,7 +184,7 @@ impl Kathoey {
     }
   }
   pub fn save(&self, fname: &str) -> Result<()> {
-    let rdn = rudano::to_string_compact(&self.map)?;
+    let rdn = rudano::to_string_compact(&self)?;
     std::fs::write(fname, rdn)?;
     Ok(())
   }
@@ -181,7 +194,7 @@ impl Kathoey {
 mod tests {
   use super::*;
   #[test]
-  //#[ignore = "ignored after dict.rs generation"]
+  #[ignore = "ignored after dict.rs generation"]
   fn from_csv() -> Result<()> {
     match Kathoey::new("dict.opcorpora.xml") {
       Ok(k) => {
@@ -190,12 +203,10 @@ mod tests {
         assert_eq!("Я не хотела этою говорить на случай, если ты увидишь.",
           k.extreme_feminize("Я не хотел этого говорить на случай, если ты увидишь."));
         // Optional: exporting
-        /*
         if let Err(exerr) = k.save("dict.rs") {
           return
             Err(eyre!("Failed to export {:?}", exerr));
         }
-        */
       }
       Err(kerr) => {
         return
@@ -205,7 +216,6 @@ mod tests {
     Ok(())
   }
   #[test]
-  #[ignore = "enable after perfomance improvements"]
   fn from_rudano() -> Result<()> {
     match Kathoey::from_rs("dict.rs") {
       Ok(k) => {
