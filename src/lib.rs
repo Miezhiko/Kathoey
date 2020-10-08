@@ -30,11 +30,16 @@ impl Kathoey {
   fn process_sentance( &self
                      , string: &str ) -> String {
     let mut out = string.to_string();
+    // TODO: use hashmap maybe
+    let mut processed_words : Vec<&str> = vec![];
     let words = string.split(&[' ',',','.',';',':','!','?','\n','\r'][..]);
     for word in words {
       if word.is_empty() { continue; }
       if let Some(fw) = self.feminize_word(word, false) {
-        out = out.replace(word, &fw);
+        if !processed_words.contains(&word) {
+          out = out.replace(word, &fw);
+          processed_words.push(word);
+        }
       }
     }
     out
