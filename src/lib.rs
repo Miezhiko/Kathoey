@@ -6,6 +6,7 @@ pub mod parser;
 
 use types::*;
 
+#[allow(clippy::unnecessary_unwrap)]
 impl Kathoey {
   pub fn from_rs(rudano: &str) -> eyre::Result<Kathoey> {
     let contents = std::fs::read_to_string(rudano)?;
@@ -16,16 +17,28 @@ impl Kathoey {
     let text = std::fs::read_to_string(csv)?;
     parser::parse_csv(text.as_str())
   }
-  pub fn feminize_word( &self
-                      , string: &str
-                      , extreme: bool ) -> Option<String> {
-    let f = self.map.get(string)?;
-    if extreme || f.lemma != Lemma::Other {
-      if f.fem < self.dict.len() {
-        let fem = self.dict[f.fem].clone();
+  fn fem( &self
+        , string: &str
+        , extreme: bool ) -> Option<String> {
+    let ff = self.map.get(string)?;
+    if extreme || ff.lemma != Lemma::Other {
+      if ff.fem < self.dict.len() {
+        let fem = self.dict[ff.fem].clone();
         Some( fem )
       } else { None }
     } else { None }
+  }
+  pub fn feminize_word( &self
+                      , string: &str
+                      , extreme: bool ) -> Option<String> {
+    if let Some(result) = self.fem(string, extreme) {
+      Some(result)
+    } else if string.contains('е') {
+      let yo = string.replace('е', "ё");
+      self.fem(&yo, extreme)
+    } else {
+      None
+    }
   }
   fn process_sentance( &self
                      , string: &str ) -> String {
@@ -102,7 +115,6 @@ impl Kathoey {
 mod tests {
   use super::*;
   #[test]
-  #[ignore = "ignored after dict.rs generation"]
   fn from_csv() -> eyre::Result<()> {
     match Kathoey::new("dict.opcorpora.xml") {
       Ok(k) => {
@@ -113,7 +125,9 @@ mod tests {
           k.feminize("Я не хотел этого говорить на случай, если ты увидишь"));
         assert_eq!("Я уверена, что у него была идея получше, он просто забыл",
           k.feminize("Я уверен, что у него была идея получше, он просто забыл"));
-        // Optional: exporting
+        assert_eq!("Вообще-то, я была немного удивлена.",
+          k.feminize("Вообще-то, я был немного удивлен."));
+        // Exporting test
         if let Err(exerr) = k.save("dict.rs") {
           return
             Err(eyre!("Failed to export {:?}", exerr));
@@ -127,14 +141,10 @@ mod tests {
     Ok(())
   }
   #[test]
+  #[ignore = "Optional test for optimized format"]
   fn from_rudano() -> eyre::Result<()> {
     match Kathoey::from_rs("dict.rs") {
       Ok(k) => {
-        assert_eq!("Я сделала это!", k.feminize("Я сделал это!"));
-        assert_eq!("Я потеряла ключи", k.feminize("Я потерял ключи"));
-        assert_eq!("Хорошо, я ответила.", k.feminize("Хорошо, я ответил."));
-        assert_eq!("Я не хотела этого говорить на случай, если ты увидишь",
-          k.feminize("Я не хотел этого говорить на случай, если ты увидишь"));
         assert_eq!("Я уверена, что у него была идея получше, он просто забыл",
           k.feminize("Я уверен, что у него была идея получше, он просто забыл"));
       }

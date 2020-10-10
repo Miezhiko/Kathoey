@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use crate::types::*;
 
 pub fn parse_csv(text: &str) -> eyre::Result<Kathoey> {
-  let mut map = HashMap::new();
+  let mut map: HashMap<String, Fem> = HashMap::new();
   let mut lemma = false;
   let mut lword = false;
   let mut gword = false;
@@ -99,22 +99,32 @@ pub fn parse_csv(text: &str) -> eyre::Result<Kathoey> {
                 };
               if lfem {
                 if word != femfem {
-                  map.insert(
-                    word.to_string(),
-                    Fem {
-                      fem: fem_index,
-                      lemma: lem
+                  if let Some(mut f) = map.get_mut(word) {
+                    if f.lemma == Lemma::Adjs
+                    && lem == Lemma::Prts {
+                      f.fem = fem_index;
+                      f.lemma = lem;
                     }
-                  );
+                  } else {
+                    map.insert(
+                      word.to_string(),
+                      Fem {
+                        fem: fem_index,
+                        lemma: lem
+                      }
+                    );
+                  }
                 }
                 for w in other.iter() {
-                  map.insert(
-                    w.to_string(),
-                    Fem {
-                      fem: fem_index,
-                      lemma: lem
-                    }
-                  );
+                  if !map.contains_key(*w) {
+                    map.insert(
+                      w.to_string(),
+                      Fem {
+                        fem: fem_index,
+                        lemma: lem
+                      }
+                    );
+                  }
                 }
               }
               lemma = false;
