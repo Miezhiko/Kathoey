@@ -6,6 +6,10 @@ pub mod parser;
 
 use types::*;
 
+use std::collections::HashSet;
+
+static SWORDS: &[&str] = &["он", "оно", "они", "ты", "вы", "мы"];
+
 #[allow(clippy::unnecessary_unwrap)]
 impl Kathoey {
   pub fn from_rs(rudano: &str) -> eyre::Result<Kathoey> {
@@ -41,17 +45,17 @@ impl Kathoey {
     }
   }
   fn process_sentance( &self
-                     , string: &str ) -> String {
+                     , string: &str
+                     , extreme: bool) -> String {
     let mut out = string.to_string();
-    // TODO: use hashmap maybe
-    let mut processed_words : Vec<&str> = vec![];
+    let mut processed_words : HashSet<&str> = HashSet::new();
     let words = string.split(&[' ',',','.',';',':','!','?','\n','\r'][..]);
     for word in words {
       if word.is_empty() { continue; }
-      if let Some(fw) = self.feminize_word(word, false) {
+      if let Some(fw) = self.feminize_word(word, extreme) {
         if !processed_words.contains(&word) {
           out = out.replace(word, &fw);
-          processed_words.push(word);
+          processed_words.insert(word);
         }
       }
     }
@@ -61,8 +65,7 @@ impl Kathoey {
                  , string: &str ) -> String {
     let lower = string.to_lowercase();
     if lower.contains('я') {
-      let others = ["он", "оно", "они", "ты"];
-      if let Some(o) = others.iter().find(|o| lower.contains(*o)) {
+      if let Some(o) = SWORDS.iter().find(|o| lower.contains(*o)) {
         let ipos = lower.find('я');
         let opos = lower.find(o);
         if ipos.is_some() && opos.is_some() {
@@ -70,34 +73,26 @@ impl Kathoey {
           let op = opos.unwrap();
           if ip > op {
             let (first, last) = string.split_at(ip);
-            format!("{}{}", first.to_string(), self.process_sentance(last))
+            format!("{}{}", first.to_string(), self.process_sentance(last, false))
           } else {
             let (first, last) = string.split_at(op);
-            format!("{}{}", self.process_sentance(first), last.to_string())
+            format!("{}{}", self.process_sentance(first, false), last.to_string())
           }
         } else {
-          self.process_sentance(string)
+          self.process_sentance(string, false)
         }
       } else {
-        self.process_sentance(string)
+        self.process_sentance(string, false)
       }
-    } else if lower.contains("он") || lower.contains("оно") || lower.contains("они") {
+    } else if SWORDS.iter().any(|o| lower.contains(*o)) {
       string.to_string()
     } else {
-      self.process_sentance(string)
+      self.process_sentance(string, false)
     }
   }
   pub fn extreme_feminize( &self
                  , string: &str ) -> String {
-    let words = string.split(&[' ',',','.',';',':','!','?','\n','\r'][..]);
-    let mut out = string.to_string();
-    for word in words {
-      if word.is_empty() { continue; }
-      if let Some(fw) = self.feminize_word(word, true) {
-        out = out.replace(word, &fw);
-      }
-    }
-    out
+    self.process_sentance(string, true)
   }
   pub fn print_this(&self) {
     for (kk, vv) in self.map.iter() {
