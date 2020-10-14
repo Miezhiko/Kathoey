@@ -62,6 +62,8 @@ pub fn parse_csv(text: &str) -> eyre::Result<Kathoey> {
               other.pop();
             } else if value.as_str() == "impr" {
               other.pop();
+            } else if value.as_str() == "neut" {
+              other.pop();
             }
           }
           if local.as_str() == "t" {
