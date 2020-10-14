@@ -7,8 +7,9 @@ pub fn parse_csv(text: &str) -> eyre::Result<Kathoey> {
   let mut lword = false;
   let mut gword = false;
   let mut fword = false;
-  let mut something = false;
-  let mut lfem = false;
+  let mut smthn = false;
+  let mut lfemm = false;
+  let mut addot = true;
   let mut word: &str = "";
   let mut mbfem: &str = "";
   let mut femfem: &str = "";
@@ -32,8 +33,9 @@ pub fn parse_csv(text: &str) -> eyre::Result<Kathoey> {
         }
         else if local.as_str() == "f" {
           fword = true;
+          addot = true;
         } else {
-          something = true;
+          smthn = true;
         }
       },
       xmlparser::Token::Attribute { local, value, .. } => {
@@ -51,26 +53,21 @@ pub fn parse_csv(text: &str) -> eyre::Result<Kathoey> {
               lem = Lemma::Prts;
             } else if value.as_str() == "femn" {
               femfem = word;
-              lfem = true;
+              lfemm = true;
             }
           }
         } else if fword {
           if gword {
             if value.as_str() == "femn" {
               femfem = mbfem;
-              lfem = true;
-              other.pop();
-            } else if value.as_str() == "impr" {
-              other.pop();
-            } else if value.as_str() == "neut" {
-              other.pop();
+              lfemm = true;
+              addot = false;
+            } else if value.as_str() == "impr"
+                   || value.as_str() == "neut" {
+              addot = false;
             }
-          }
-          if local.as_str() == "t" {
+          } else if local.as_str() == "t" {
             mbfem = value.as_str();
-            // TODO: optimization, don't push early
-            // so don't pop, do push on ElementEnd
-            other.push(mbfem);
           }
         }
       },
@@ -80,11 +77,15 @@ pub fn parse_csv(text: &str) -> eyre::Result<Kathoey> {
             // means > and we not interested in those
           }
           _ => {
-            if something {
-              something = false;
+            if smthn {
+              smthn = false;
             } else if gword {
               gword = false;
             } else if fword {
+              if addot {
+                other.push(mbfem);
+              }
+              addot = false;
               fword = false;
             } else if lword {
               lword = false;
@@ -99,7 +100,7 @@ pub fn parse_csv(text: &str) -> eyre::Result<Kathoey> {
                   fem_index += 1;
                   i
                 };
-              if lfem {
+              if lfemm {
                 if word != femfem {
                   if let Some(mut f) = map.get_mut(word) {
                     if f.lemma == Lemma::Adjs
@@ -131,7 +132,7 @@ pub fn parse_csv(text: &str) -> eyre::Result<Kathoey> {
               }
               lemma = false;
               lem = Lemma::Other;
-              lfem = false;
+              lfemm = false;
               other.clear();
             }
           }
