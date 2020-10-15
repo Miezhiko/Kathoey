@@ -124,6 +124,8 @@ mod tests {
           k.feminize("Вообще-то, я был немного удивлен."));
         assert_eq!("Мне нравилось, когда я в аниме и не беспокойся о спойлерах.",
           k.feminize("Мне нравилось, когда я в аниме и не беспокойся о спойлерах."));
+        assert_eq!("Я скажу ему это.",
+          k.feminize("Я скажу ему это."));
         // Exporting test
         if let Err(exerr) = k.save("dict.rs") {
           return

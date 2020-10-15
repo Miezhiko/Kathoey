@@ -101,25 +101,14 @@ pub fn parse_csv(text: &str) -> eyre::Result<Kathoey> {
                   i
                 };
               if lfemm {
-                if word != femfem {
-                  if let Some(mut f) = map.get_mut(word) {
+                for w in other.iter() {
+                  if let Some(mut f) = map.get_mut(*w) {
                     if f.lemma == Lemma::Adjs
                     && lem == Lemma::Prts {
                       f.fem = fem_index;
                       f.lemma = lem;
                     }
                   } else {
-                    map.insert(
-                      word.to_string(),
-                      Fem {
-                        fem: fem_index,
-                        lemma: lem
-                      }
-                    );
-                  }
-                }
-                for w in other.iter() {
-                  if !map.contains_key(*w) {
                     map.insert(
                       w.to_string(),
                       Fem {
