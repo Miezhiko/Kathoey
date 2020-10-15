@@ -9,6 +9,7 @@ pub fn parse_csv(text: &str) -> eyre::Result<Kathoey> {
   let mut fword = false;
   let mut smthn = false;
   let mut lfemm = false;
+  let mut addvr = false;
   let mut addot = true;
   let mut word: &str = "";
   let mut mbfem: &str = "";
@@ -66,6 +67,10 @@ pub fn parse_csv(text: &str) -> eyre::Result<Kathoey> {
                    || value.as_str() == "neut" {
               addot = false;
             }
+            if lem == Lemma::Verb
+            && value.as_str() == "masc" {
+              addvr = true;
+            }
           } else if local.as_str() == "t" {
             mbfem = value.as_str();
           }
@@ -82,10 +87,15 @@ pub fn parse_csv(text: &str) -> eyre::Result<Kathoey> {
             } else if gword {
               gword = false;
             } else if fword {
-              if addot {
+              if lem == Lemma::Verb {
+                if addot && addvr {
+                  other.push(mbfem);
+                }
+              } else if addot {
                 other.push(mbfem);
               }
-              addot = false;
+              addot = true;
+              addvr = false;
               fword = false;
             } else if lword {
               lword = false;
