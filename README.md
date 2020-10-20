@@ -14,7 +14,7 @@ Serialization from xml and export to rudano
 
 ```rust
 fn from_csv() -> eyre::Result<()> {
-  match Kathoey::new("dict.opcorpora.xml") {
+  match Kathoey::from_xml("dict.opcorpora.xml") {
     Ok(k) => {
       if let Err(exerr) = k.save("dict.rs") {
         return

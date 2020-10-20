@@ -1,6 +1,6 @@
 [package]
 name        = "kathoey"
-version     = "0.0.12"
+version     = "0.0.13"
 description = "Rust library for text feminization using open corpus linguistics data"
 authors     = [ "Qeenon" ]
 license     = "ISC"
@@ -13,6 +13,6 @@ edition     = "2018"
 xmlparser     = "0.13.3"
 eyre          = "0.6.1"
 rudano        = "0.1.0"
-serde_derive  = "1.0.116"
+serde_derive  = "1.0.117"
 
-serde = { version = "1.0.116", features = ["derive"] }
+serde = { version = "1.0.117", features = ["derive"] }

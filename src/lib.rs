@@ -17,9 +17,9 @@ impl Kathoey {
     let k = rudano::from_str(&contents)?;
     Ok(k)
   }
-  pub fn new(csv: &str) -> eyre::Result<Kathoey> {
+  pub fn from_xml(csv: &str) -> eyre::Result<Kathoey> {
     let text = std::fs::read_to_string(csv)?;
-    parser::parse_csv(text.as_str())
+    parser::parse_xml(text.as_str())
   }
   fn fem( &self
         , string: &str
@@ -111,7 +111,7 @@ mod tests {
   use super::*;
   #[test]
   fn from_csv() -> eyre::Result<()> {
-    match Kathoey::new("dict.opcorpora.xml") {
+    match Kathoey::from_xml("dict.opcorpora.xml") {
       Ok(k) => {
         assert_eq!("Я сделала это!", k.feminize("Я сделал это!"));
         assert_eq!("Я потеряла ключи", k.feminize("Я потерял ключи"));
