@@ -1,6 +1,6 @@
 [package]
 name        = "kathoey"
-version     = "0.0.13"
+version     = "0.0.14"
 description = "Rust library for text feminization using open corpus linguistics data"
 authors     = [ "Qeenon" ]
 license     = "ISC"

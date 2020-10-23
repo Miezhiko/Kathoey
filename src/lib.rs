@@ -9,6 +9,7 @@ use types::*;
 use std::collections::HashSet;
 
 static SWORDS: &[&str] = &["он", "оно", "они", "ты", "вы", "мы"];
+static SEPARATORS: [char; 9] = [' ',',','.',';',':','!','?','\n','\r'];
 
 #[allow(clippy::unnecessary_unwrap)]
 impl Kathoey {
@@ -49,7 +50,7 @@ impl Kathoey {
                      , extreme: bool) -> String {
     let mut out = string.to_string();
     let mut processed_words : HashSet<&str> = HashSet::new();
-    let words = string.split(&[' ',',','.',';',':','!','?','\n','\r'][..]);
+    let words = string.split(&SEPARATORS[..]);
     for word in words {
       if word.is_empty() { continue; }
       if let Some(fw) = self.feminize_word(word, extreme) {
@@ -64,18 +65,22 @@ impl Kathoey {
   pub fn feminize( &self
                  , string: &str ) -> String {
     let lower = string.to_lowercase();
-    if lower.contains('я') {
-      if let Some(o) = SWORDS.iter().find(|o| lower.contains(*o)) {
-        let ipos = lower.find('я');
-        let opos = lower.find(o);
+    let lwords = lower.split(&SEPARATORS[..])
+                      .collect::<Vec<&str>>();
+    if lwords.contains(&"я") {
+      if let Some(o) = SWORDS.iter().find(|o| lwords.contains(o)) {
+        let ipos = lwords.iter().position(|&w| w == "я");
+        let opos = lwords.iter().position(|&w| w == *o);
         if ipos.is_some() && opos.is_some() {
           let ip = ipos.unwrap();
           let op = opos.unwrap();
           if ip > op {
-            let (first, last) = string.split_at(ip);
+            let pos = lwords[0..ip].join(" ").len();
+            let (first, last) = string.split_at(pos);
             format!("{}{}", first.to_string(), self.process_sentance(last, false))
           } else {
-            let (first, last) = string.split_at(op);
+            let pos = lwords[0..op].join(" ").len();
+            let (first, last) = string.split_at(pos);
             format!("{}{}", self.process_sentance(first, false), last.to_string())
           }
         } else {
@@ -126,6 +131,8 @@ mod tests {
           k.feminize("Мне нравилось, когда я в аниме и не беспокойся о спойлерах."));
         assert_eq!("Я скажу ему это.",
           k.feminize("Я скажу ему это."));
+        assert_eq!("Ничего страшного и спасибо, что посмотрел на меня, если ты когда-нибудь захочешь вернуться в Воу, я всегда рада играть с тобой.",
+          k.feminize("Ничего страшного и спасибо, что посмотрел на меня, если ты когда-нибудь захочешь вернуться в Воу, я всегда рад играть с тобой."));
         // Exporting test
         if let Err(exerr) = k.save("dict.rs") {
           return

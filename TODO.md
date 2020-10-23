@@ -1,3 +1,4 @@
  - rework feminize function to recursive sentance split
  - try to make smarter deps parsing based on lemmas order
  - integrate some deep learning based deps parsing possibly
+ - rework tests
