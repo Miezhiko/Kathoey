@@ -53,7 +53,8 @@ impl Kathoey {
     let words = string.split(&SEPARATORS[..]);
     for word in words {
       if word.is_empty() { continue; }
-      if let Some(fw) = self.feminize_word(word, extreme) {
+      let small_word = word.to_lowercase();
+      if let Some(fw) = self.feminize_word(&small_word, extreme) {
         if !processed_words.contains(&word) {
           out = out.replace(word, &fw);
           processed_words.insert(word);
@@ -118,6 +119,7 @@ mod tests {
   fn from_csv() -> eyre::Result<()> {
     match Kathoey::from_xml("dict.opcorpora.xml") {
       Ok(k) => {
+        assert_eq!("начала наруто смотреть", k.feminize("Начал наруто смотреть"));
         assert_eq!("Я сделала это!", k.feminize("Я сделал это!"));
         assert_eq!("Я потеряла ключи", k.feminize("Я потерял ключи"));
         assert_eq!("Хорошо, я ответила.", k.feminize("Хорошо, я ответил."));

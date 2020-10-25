@@ -113,8 +113,7 @@ pub fn parse_xml(text: &str) -> eyre::Result<Kathoey> {
               if lfemm {
                 for w in other.iter() {
                   if let Some(mut f) = map.get_mut(*w) {
-                    if f.lemma == Lemma::Adjs
-                    && lem == Lemma::Prts {
+                    if lem < f.lemma {
                       f.fem = fem_index;
                       f.lemma = lem;
                     }
