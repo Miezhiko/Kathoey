@@ -4,18 +4,22 @@ pub mod parser;
 #[allow(unused_imports)]
 #[macro_use] extern crate eyre;
 
+use bincode;
 use types::*;
 
 use std::collections::HashSet;
+
+use std::io::{ BufWriter, BufReader };
 
 static SWORDS: &[&str] = &["он", "оно", "они", "ты", "вы", "мы"];
 static SEPARATORS: [char; 9] = [' ',',','.',';',':','!','?','\n','\r'];
 
 #[allow(clippy::unnecessary_unwrap)]
 impl Kathoey {
-  pub fn from_rs(rudano: &str) -> eyre::Result<Kathoey> {
-    let contents = std::fs::read_to_string(rudano)?;
-    let k = rudano::from_str(&contents)?;
+  pub fn load(bin: &str) -> eyre::Result<Kathoey> {
+    let f = std::fs::File::open(bin)?;
+    let b = BufReader::new(f);
+    let k = bincode::deserialize_from(b)?;
     Ok(k)
   }
   pub fn from_xml(csv: &str) -> eyre::Result<Kathoey> {
@@ -106,8 +110,9 @@ impl Kathoey {
     }
   }
   pub fn save(&self, fname: &str) -> eyre::Result<()> {
-    let rdn = rudano::to_string_compact(&self)?;
-    std::fs::write(fname, rdn)?;
+    let f = std::fs::File::create(fname)?;
+    let mut bw = BufWriter::new(f);
+    bincode::serialize_into(&mut bw, &self)?;
     Ok(())
   }
 }
@@ -136,7 +141,7 @@ mod tests {
         assert_eq!("Ничего страшного и спасибо, что посмотрел на меня, если ты когда-нибудь захочешь вернуться в Воу, я всегда рада играть с тобой.",
           k.feminize("Ничего страшного и спасибо, что посмотрел на меня, если ты когда-нибудь захочешь вернуться в Воу, я всегда рад играть с тобой."));
         // Exporting test
-        if let Err(exerr) = k.save("dict.rs") {
+        if let Err(exerr) = k.save("dict.bin") {
           return
             Err(eyre!("Failed to export {:?}", exerr));
         }
@@ -149,16 +154,15 @@ mod tests {
     Ok(())
   }
   #[test]
-  #[ignore = "Optional test for optimized format"]
-  fn from_rudano() -> eyre::Result<()> {
-    match Kathoey::from_rs("dict.rs") {
+  fn from_bincode() -> eyre::Result<()> {
+    match Kathoey::load("dict.bin") {
       Ok(k) => {
         assert_eq!("Я уверена, что у него была идея получше, он просто забыл",
           k.feminize("Я уверен, что у него была идея получше, он просто забыл"));
       }
       Err(kerr) => {
         return
-          Err(eyre!("Failed to import rs {:?}", kerr));
+          Err(eyre!("Failed to import bin {:?}", kerr));
       }
     }
     Ok(())

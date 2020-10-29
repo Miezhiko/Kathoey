@@ -13,4 +13,4 @@ Cargo.lock
 *.xml
 
 # Exported
-dict.rs
+dict.bin

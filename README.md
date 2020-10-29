@@ -3,8 +3,8 @@ Rust library for text feminization
 
  - currently using Russian from http://opencorpora.org
  - using xmlparser for [perfomance](https://github.com/RazrFalcon/roxmltree#performance)
- - exporting parsed Kathoey to optimized rudano format
- - use from_rudano for speed up!
+ - exporting parsed Kathoey to binary format
+ - use load (from bincode) for speed up!
  - two modes (extreme and regular)
 
 # Usage
@@ -16,7 +16,7 @@ Serialization from xml and export to rudano
 fn from_csv() -> eyre::Result<()> {
   match Kathoey::from_xml("dict.opcorpora.xml") {
     Ok(k) => {
-      if let Err(exerr) = k.save("dict.rs") {
+      if let Err(exerr) = k.save("dict.bin") {
         return
           Err(eyre!("Failed to export {:?}", exerr));
       }
@@ -34,7 +34,7 @@ Few test and import from Rudano:
 
 ```rust
 fn from_rudano() -> eyre::Result<()> {
-  match Kathoey::from_rs("dict.rs") {
+  match Kathoey::from_rs("dict.bin") {
     Ok(k) => {
       assert_eq!("Я сделала это!", k.feminize("Я сделал это!"));
       assert_eq!("Я потеряла ключи", k.feminize("Я потерял ключи"));
