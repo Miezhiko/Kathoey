@@ -30,7 +30,7 @@ fn from_csv() -> eyre::Result<()> {
 }
 ```
 
-Few test and import from Rudano:
+Few test and import from binary:
 
 ```rust
 fn from_rudano() -> eyre::Result<()> {
