@@ -34,7 +34,7 @@ Few test and import from binary:
 
 ```rust
 fn from_rudano() -> eyre::Result<()> {
-  match Kathoey::from_rs("dict.bin") {
+  match Kathoey::load("dict.bin") {
     Ok(k) => {
       assert_eq!("Я сделала это!", k.feminize("Я сделал это!"));
       assert_eq!("Я потеряла ключи", k.feminize("Я потерял ключи"));
