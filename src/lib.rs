@@ -1,5 +1,6 @@
 pub mod types;
 pub mod parser;
+pub mod utils;
 
 #[allow(unused_imports)]
 #[macro_use] extern crate eyre;
@@ -58,8 +59,26 @@ impl Kathoey {
     for word in words {
       if word.is_empty() { continue; }
       let small_word = word.to_lowercase();
-      if let Some(fw) = self.feminize_word(&small_word, extreme) {
+      if let Some(mut fw) = self.feminize_word(&small_word, extreme) {
         if !processed_words.contains(&word) {
+          let mut whole_word_uppercase  = true;
+          let mut first_char_uppercase  = true;
+          let mut first_char_checked    = false;
+          for ch in word.chars() {
+            if ch.is_lowercase() {
+              if !first_char_checked {
+                first_char_uppercase = false;
+              }
+              whole_word_uppercase = false;
+              break;
+            }
+            first_char_checked = true;
+          }
+          if whole_word_uppercase {
+            fw = fw.to_uppercase();
+          } else if first_char_uppercase {
+            fw = utils::capital_first(&fw);
+          }
           out = out.replace(word, &fw);
           processed_words.insert(word);
         }
@@ -82,11 +101,13 @@ impl Kathoey {
           if ip > op {
             let pos = lwords[0..ip].join(" ").len();
             let (first, last) = string.split_at(pos);
-            format!("{}{}", first.to_string(), self.process_sentance(last, false))
+            let fem_first = self.feminize(first);
+            format!("{}{}", fem_first, self.process_sentance(last, false))
           } else {
             let pos = lwords[0..op].join(" ").len();
             let (first, last) = string.split_at(pos);
-            format!("{}{}", self.process_sentance(first, false), last.to_string())
+            let fem_last = self.feminize(last);
+            format!("{}{}", self.process_sentance(first, false), fem_last)
           }
         } else {
           self.process_sentance(string, false)
@@ -119,28 +140,14 @@ impl Kathoey {
 
 #[cfg(test)]
 mod tests {
+  use serial_test::serial;
   use super::*;
   #[test]
+  #[serial]
   fn from_csv() -> eyre::Result<()> {
     match Kathoey::from_xml("dict.opcorpora.xml") {
       Ok(k) => {
-        assert_eq!("начала наруто смотреть", k.feminize("Начал наруто смотреть"));
-        assert_eq!("Я сделала это!", k.feminize("Я сделал это!"));
-        assert_eq!("Я потеряла ключи", k.feminize("Я потерял ключи"));
-        assert_eq!("Хорошо, я ответила.", k.feminize("Хорошо, я ответил."));
-        assert_eq!("Я не хотела этого говорить на случай, если ты увидишь",
-          k.feminize("Я не хотел этого говорить на случай, если ты увидишь"));
-        assert_eq!("Я уверена, что у него была идея получше, он просто забыл",
-          k.feminize("Я уверен, что у него была идея получше, он просто забыл"));
-        assert_eq!("Вообще-то, я была немного удивлена.",
-          k.feminize("Вообще-то, я был немного удивлен."));
-        assert_eq!("Мне нравилось, когда я в аниме и не беспокойся о спойлерах.",
-          k.feminize("Мне нравилось, когда я в аниме и не беспокойся о спойлерах."));
-        assert_eq!("Я скажу ему это.",
-          k.feminize("Я скажу ему это."));
-        assert_eq!("Ничего страшного и спасибо, что посмотрел на меня, если ты когда-нибудь захочешь вернуться в Воу, я всегда рада играть с тобой.",
-          k.feminize("Ничего страшного и спасибо, что посмотрел на меня, если ты когда-нибудь захочешь вернуться в Воу, я всегда рад играть с тобой."));
-        // Exporting test
+        assert_eq!("Начала наруто смотреть", k.feminize("Начал наруто смотреть"));
         if let Err(exerr) = k.save("dict.bin") {
           return
             Err(eyre!("Failed to export {:?}", exerr));
@@ -154,11 +161,24 @@ mod tests {
     Ok(())
   }
   #[test]
+  #[serial]
   fn from_bincode() -> eyre::Result<()> {
     match Kathoey::load("dict.bin") {
       Ok(k) => {
+        assert_eq!("Я сделала это!", k.feminize("Я сделал это!"));
+        assert_eq!("Я потеряла ключи", k.feminize("Я потерял ключи"));
+        assert_eq!("Хорошо, я ответила.", k.feminize("Хорошо, я ответил."));
+        assert_eq!("Я не хотела этого говорить на случай, если ты увидишь",
+          k.feminize("Я не хотел этого говорить на случай, если ты увидишь"));
         assert_eq!("Я уверена, что у него была идея получше, он просто забыл",
           k.feminize("Я уверен, что у него была идея получше, он просто забыл"));
+        assert_eq!("Вообще-то, я была немного удивлена.",
+          k.feminize("Вообще-то, я был немного удивлен."));
+        assert_eq!("Мне нравилось, когда я в аниме и не беспокойся о спойлерах.",
+          k.feminize("Мне нравилось, когда я в аниме и не беспокойся о спойлерах."));
+        assert_eq!("Я скажу ему это.", k.feminize("Я скажу ему это."));
+        assert_eq!("Ничего страшного и спасибо, что посмотрел на меня, если ты когда-нибудь захочешь вернуться в Воу, я всегда рада играть с тобой.",
+          k.feminize("Ничего страшного и спасибо, что посмотрел на меня, если ты когда-нибудь захочешь вернуться в Воу, я всегда рад играть с тобой."));
       }
       Err(kerr) => {
         return
