@@ -13,7 +13,7 @@ Serialization from xml and export to rudano
 (tho, export is really optional, export from xml is enough fast)
 
 ```rust
-fn from_csv() -> eyre::Result<()> {
+fn from_xml() -> eyre::Result<()> {
   match Kathoey::from_xml("dict.opcorpora.xml") {
     Ok(k) => {
       if let Err(exerr) = k.save("dict.bin") {
@@ -33,7 +33,7 @@ fn from_csv() -> eyre::Result<()> {
 Few test and import from binary:
 
 ```rust
-fn from_rudano() -> eyre::Result<()> {
+fn from_binary() -> eyre::Result<()> {
   match Kathoey::load("dict.bin") {
     Ok(k) => {
       assert_eq!("Я сделала это!", k.feminize("Я сделал это!"));
