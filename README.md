@@ -1,6 +1,8 @@
 # Kathoey
 Rust library for text feminization
 
+![Rust](https://github.com/Qeenon/Kathoey/workflows/Rust/badge.svg)
+
  - currently using Russian from http://opencorpora.org
  - using xmlparser for [perfomance](https://github.com/RazrFalcon/roxmltree#performance)
  - exporting parsed Kathoey to binary format
