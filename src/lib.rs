@@ -13,7 +13,7 @@ use std::collections::HashSet;
 use std::io::{ BufWriter, BufReader };
 
 static SWORDS: &[&str] = &["он", "оно", "они", "ты", "вы", "мы"];
-static SEPARATORS: [char; 9] = [' ',',','.',';',':','!','?','\n','\r'];
+static SEPARATORS: [char; 10] = [' ',',','.',';',':','!','?','_','\n','\r'];
 
 #[allow(clippy::unnecessary_unwrap)]
 impl Kathoey {
