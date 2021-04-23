@@ -3,7 +3,7 @@ pub mod parser;
 pub mod utils;
 
 #[allow(unused_imports)]
-#[macro_use] extern crate eyre;
+#[macro_use] extern crate anyhow;
 
 use bincode;
 use types::*;
@@ -17,13 +17,13 @@ static SEPARATORS: [char; 10] = [' ',',','.',';',':','!','?','_','\n','\r'];
 
 #[allow(clippy::unnecessary_unwrap)]
 impl Kathoey {
-  pub fn load(bin: &str) -> eyre::Result<Kathoey> {
+  pub fn load(bin: &str) -> anyhow::Result<Kathoey> {
     let f = std::fs::File::open(bin)?;
     let b = BufReader::new(f);
     let k = bincode::deserialize_from(b)?;
     Ok(k)
   }
-  pub fn from_xml(csv: &str) -> eyre::Result<Kathoey> {
+  pub fn from_xml(csv: &str) -> anyhow::Result<Kathoey> {
     let text = std::fs::read_to_string(csv)?;
     parser::parse_xml(text.as_str())
   }
@@ -130,7 +130,7 @@ impl Kathoey {
       println!("{} -> {}", kk, vv.fem);
     }
   }
-  pub fn save(&self, fname: &str) -> eyre::Result<()> {
+  pub fn save(&self, fname: &str) -> anyhow::Result<()> {
     let f = std::fs::File::create(fname)?;
     let mut bw = BufWriter::new(f);
     bincode::serialize_into(&mut bw, &self)?;
@@ -144,25 +144,25 @@ mod tests {
   use super::*;
   #[test]
   #[serial]
-  fn from_csv() -> eyre::Result<()> {
+  fn from_csv() -> anyhow::Result<()> {
     match Kathoey::from_xml("dict.opcorpora.xml") {
       Ok(k) => {
         assert_eq!("Начала наруто смотреть", k.feminize("Начал наруто смотреть"));
         if let Err(exerr) = k.save("dict.bin") {
           return
-            Err(eyre!("Failed to export {:?}", exerr));
+            Err(anyhow!("Failed to export {:?}", exerr));
         }
       }
       Err(kerr) => {
         return
-          Err(eyre!("Failed to create {:?}", kerr));
+          Err(anyhow!("Failed to create {:?}", kerr));
       }
     }
     Ok(())
   }
   #[test]
   #[serial]
-  fn from_bincode() -> eyre::Result<()> {
+  fn from_bincode() -> anyhow::Result<()> {
     match Kathoey::load("dict.bin") {
       Ok(k) => {
         assert_eq!("Я сделала это!", k.feminize("Я сделал это!"));
@@ -182,7 +182,7 @@ mod tests {
       }
       Err(kerr) => {
         return
-          Err(eyre!("Failed to import bin {:?}", kerr));
+          Err(anyhow!("Failed to import bin {:?}", kerr));
       }
     }
     Ok(())

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use crate::types::*;
 
-pub fn parse_xml(text: &str) -> eyre::Result<Kathoey> {
+pub fn parse_xml(text: &str) -> anyhow::Result<Kathoey> {
   let mut map: HashMap<String, Fem> = HashMap::new();
   let mut lemma = false;
   let mut lword = false;
