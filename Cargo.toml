@@ -1,11 +1,11 @@
 [package]
 name        = "kathoey"
-version     = "1.0.6"
+version     = "1.0.7"
 description = "Rust library for text feminization using open corpus linguistics data"
-authors     = [ "Qeenon" ]
+authors     = [ "Miezhiko" ]
 license     = "LGPL-3.0-only"
 keywords    = [ "russian", "nlp" ]
-repository  = "https://github.com/Qeenon/Kathoey"
+repository  = "https://github.com/Miezhiko/Kathoey"
 readme      = "README.md"
 edition     = "2018"
 
