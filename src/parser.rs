@@ -14,13 +14,13 @@ pub fn parse_xml(text: &str) -> anyhow::Result<Kathoey> {
   let mut word: &str = "";
   let mut mbfem: &str = "";
   let mut femfem: &str = "";
-  let mut other = vec![];
-  let mut dict = vec![];
+  let mut other: Vec<&str> = vec![];
+  let mut dict: Vec<String> = vec![];
   let mut temp_dict: HashMap<&str, usize> = HashMap::new();
   let mut fem_index : usize = 0;
-  let mut lem = Lemma::Other;
+  let mut lem: Lemma = Lemma::Other;
   for token in xmlparser::Tokenizer::from(text) {
-    let t = token?;
+    let t: xmlparser::Token = token?;
     match t {
       xmlparser::Token::ElementStart { local, .. } => {
         if local.as_str() == "lemma" {

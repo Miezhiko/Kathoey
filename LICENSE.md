@@ -1,7 +1,7 @@
 GNU LESSER GENERAL PUBLIC LICENSE
 Version 3, 29 June 2007
 
-Copyright (c) 2020-2021, Маша Qeenon <masha@tutamail.com>
+Copyright (c) 2020-2021, Miezhiko <masha@tutamail.com>
 
 Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.
 

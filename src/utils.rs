@@ -1,5 +1,5 @@
 pub fn capital_first(s: &str) -> String {
-  let mut c = s.chars();
+  let mut c: std::str::Chars = s.chars();
   match c.next() {
     None => String::new(),
     Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),

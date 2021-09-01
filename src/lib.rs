@@ -18,47 +18,47 @@ pub static SEPARATORS: [char; 10] = [' ',',','.',';',':','!','?','_','\n','\r'];
 #[allow(clippy::unnecessary_unwrap)]
 impl Kathoey {
   pub fn load(bin: &str) -> anyhow::Result<Kathoey> {
-    let f = std::fs::File::open(bin)?;
-    let b = BufReader::new(f);
-    let k = bincode::deserialize_from(b)?;
+    let f: std::fs::File = std::fs::File::open(bin)?;
+    let b: BufReader<std::fs::File> = BufReader::new(f);
+    let k: Kathoey = bincode::deserialize_from(b)?;
     Ok(k)
   }
   pub fn from_xml(csv: &str) -> anyhow::Result<Kathoey> {
-    let text = std::fs::read_to_string(csv)?;
+    let text: String = std::fs::read_to_string(csv)?;
     parser::parse_xml(text.as_str())
   }
   fn fem( &self
-        , string: &str
+        , slice: &str
         , extreme: bool ) -> Option<String> {
-    let ff = self.map.get(string)?;
+    let ff: &Fem = self.map.get(slice)?;
     if extreme || ff.lemma != Lemma::Other {
       if ff.fem < self.dict.len() {
-        let fem = self.dict[ff.fem].clone();
+        let fem: String = self.dict[ff.fem].clone();
         Some( fem )
       } else { None }
     } else { None }
   }
   pub fn feminize_word( &self
-                      , string: &str
+                      , slice: &str
                       , extreme: bool ) -> Option<String> {
-    if let Some(result) = self.fem(string, extreme) {
+    if let Some(result) = self.fem(slice, extreme) {
       Some(result)
-    } else if string.contains('е') {
-      let yo = string.replace('е', "ё");
+    } else if slice.contains('е') {
+      let yo: String = slice.replace('е', "ё");
       self.fem(&yo, extreme)
     } else {
       None
     }
   }
   fn process_sentance( &self
-                     , string: &str
+                     , slice: &str
                      , extreme: bool) -> String {
-    let mut out = string.to_string();
+    let mut out: String = slice.into();
     let mut processed_words : HashSet<&str> = HashSet::new();
-    let words = string.split(&SEPARATORS[..]);
+    let words: std::str::Split<&[char]> = slice.split(&SEPARATORS[..]);
     for word in words {
       if word.is_empty() { continue; }
-      let small_word = word.to_lowercase();
+      let small_word: String = word.to_lowercase();
       if let Some(mut fw) = self.feminize_word(&small_word, extreme) {
         if !processed_words.contains(&word) {
           let mut whole_word_uppercase  = true;
@@ -87,42 +87,42 @@ impl Kathoey {
     out
   }
   pub fn feminize( &self
-                 , string: &str ) -> String {
-    let lower = string.to_lowercase();
-    let lwords = lower.split(&SEPARATORS[..])
-                      .collect::<Vec<&str>>();
+                 , slice: &str ) -> String {
+    let lower: String = slice.to_lowercase();
+    let lwords: Vec<&str> = lower.split(&SEPARATORS[..])
+                                 .collect::<Vec<&str>>();
     if lwords.contains(&"я") {
       if let Some(o) = SWORDS.iter().find(|o| lwords.contains(o)) {
-        let ipos = lwords.iter().position(|&w| w == "я");
-        let opos = lwords.iter().position(|&w| w == *o);
+        let ipos: Option<usize> = lwords.iter().position(|&w| w == "я");
+        let opos: Option<usize> = lwords.iter().position(|&w| w == *o);
         if ipos.is_some() && opos.is_some() {
-          let ip = ipos.unwrap();
-          let op = opos.unwrap();
+          let ip: usize = ipos.unwrap();
+          let op: usize = opos.unwrap();
           if ip > op {
-            let pos = lwords[0..ip].join(" ").len();
-            let (first, last) = string.split_at(pos);
-            let fem_first = self.feminize(first);
+            let pos: usize = lwords[0..ip].join(" ").len();
+            let (first, last) = slice.split_at(pos);
+            let fem_first: String = self.feminize(first);
             format!("{}{}", fem_first, self.process_sentance(last, false))
           } else {
-            let pos = lwords[0..op].join(" ").len();
-            let (first, last) = string.split_at(pos);
+            let pos: usize = lwords[0..op].join(" ").len();
+            let (first, last) = slice.split_at(pos);
             let fem_last = self.feminize(last);
             format!("{}{}", self.process_sentance(first, false), fem_last)
           }
         } else {
-          self.process_sentance(string, false)
+          self.process_sentance(slice, false)
         }
       } else {
-        self.process_sentance(string, false)
+        self.process_sentance(slice, false)
       }
     } else if SWORDS.iter().any(|o| lower.contains(*o)) {
-      string.to_string()
+      slice.to_string()
     } else {
-      self.process_sentance(string, false)
+      self.process_sentance(slice, false)
     }
   }
   pub fn extreme_feminize( &self
-                 , string: &str ) -> String {
+                         , string: &str ) -> String {
     self.process_sentance(string, true)
   }
   pub fn print_this(&self) {
@@ -131,8 +131,8 @@ impl Kathoey {
     }
   }
   pub fn save(&self, fname: &str) -> anyhow::Result<()> {
-    let f = std::fs::File::create(fname)?;
-    let mut bw = BufWriter::new(f);
+    let f: std::fs::File = std::fs::File::create(fname)?;
+    let mut bw: BufWriter<std::fs::File> = BufWriter::new(f);
     bincode::serialize_into(&mut bw, &self)?;
     Ok(())
   }
