@@ -12,8 +12,8 @@ Rust library for text feminization
 
 # Usage
 
-Serialization from xml and export to rudano
-(tho, export is really optional, export from xml is enough fast)
+Serialization from xml and export to binary serialized format
+(tho, export is optional, export from xml is fast enough)
 
 ```rust
 fn from_xml() -> eyre::Result<()> {
