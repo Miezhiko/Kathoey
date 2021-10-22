@@ -5,7 +5,6 @@ pub mod utils;
 #[allow(unused_imports)]
 #[macro_use] extern crate anyhow;
 
-use bincode;
 use types::*;
 
 use std::collections::HashSet;
