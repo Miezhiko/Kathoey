@@ -2,7 +2,7 @@
 Rust library for text feminization
 
 ![Rust](https://github.com/Qeenon/Kathoey/workflows/Rust/badge.svg)
-[![crates.io version]][crates.io link] [![rust 1.48.0+ badge]][rust 1.48.0+ link]
+[![crates.io version]][crates.io link]
 
  - currently using Russian from http://opencorpora.org
  - using xmlparser for [perfomance](https://github.com/RazrFalcon/roxmltree#performance)
@@ -66,5 +66,3 @@ fn from_binary() -> eyre::Result<()> {
 
 [crates.io link]: https://crates.io/crates/kathoey
 [crates.io version]: https://img.shields.io/crates/v/kathoey.svg
-[rust 1.48.0+ badge]: https://img.shields.io/badge/rust-1.48.0+-93450a.svg
-[rust 1.48.0+ link]: https://blog.rust-lang.org/2020/11/19/Rust-1.48.html

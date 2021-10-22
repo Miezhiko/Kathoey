@@ -8,6 +8,7 @@ keywords    = [ "russian", "nlp" ]
 repository  = "https://github.com/Miezhiko/Kathoey"
 readme      = "README.md"
 edition     = "2021"
+rust        = "1.56.0"
 
 [dependencies]
 xmlparser     = "0.13"
