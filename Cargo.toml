@@ -1,13 +1,13 @@
 [package]
 name        = "kathoey"
-version     = "1.0.8"
+version     = "1.0.9"
 description = "Rust library for text feminization using open corpus linguistics data"
 authors     = [ "Miezhiko" ]
 license     = "LGPL-3.0-only"
 keywords    = [ "russian", "nlp" ]
 repository  = "https://github.com/Miezhiko/Kathoey"
 readme      = "README.md"
-edition     = "2018"
+edition     = "2021"
 
 [dependencies]
 xmlparser     = "0.13"
