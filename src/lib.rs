@@ -9,18 +9,17 @@ use types::*;
 
 use std::collections::HashSet;
 
-use std::io::{ BufWriter, BufReader };
-
 static SWORDS: &[&str] = &["он", "оно", "они", "ты", "вы", "мы"];
 pub static SEPARATORS: [char; 10] = [' ',',','.',';',':','!','?','_','\n','\r'];
 
 #[allow(clippy::unnecessary_unwrap)]
 impl Kathoey {
   pub fn load(bin: &str) -> anyhow::Result<Kathoey> {
-    let f: std::fs::File = std::fs::File::open(bin)?;
-    let b: BufReader<std::fs::File> = BufReader::new(f);
-    let k: Kathoey = bincode::deserialize_from(b)?;
-    Ok(k)
+    let mut bin_file: std::fs::File = std::fs::File::open(bin)?;
+    let kathoey: Kathoey =
+      bincode::decode_from_std_read( &mut bin_file
+                                   , bincode::config::standard() )?;
+    Ok(kathoey)
   }
   pub fn from_xml(csv: &str) -> anyhow::Result<Kathoey> {
     let text: String = std::fs::read_to_string(csv)?;
@@ -130,9 +129,10 @@ impl Kathoey {
     }
   }
   pub fn save(&self, fname: &str) -> anyhow::Result<()> {
-    let f: std::fs::File = std::fs::File::create(fname)?;
-    let mut bw: BufWriter<std::fs::File> = BufWriter::new(f);
-    bincode::serialize_into(&mut bw, &self)?;
+    let mut bin_file: std::fs::File = std::fs::File::create(fname)?;
+    bincode::encode_into_std_write( &self
+                                  , &mut bin_file
+                                  , bincode::config::standard() )?;
     Ok(())
   }
 }
