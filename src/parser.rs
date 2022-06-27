@@ -106,24 +106,24 @@ pub fn parse_xml(text: &str) -> anyhow::Result<Kathoey> {
                 } else {
                   let i = fem_index;
                   temp_dict.insert(femfem, i);
-                  let femfemfem: String;
-                  if femfem.contains('ё') {
-                    femfemfem = femfem.replace('ё', "е");
-                  } else {
-                    femfemfem = femfem.to_string();
-                  }
+                  let femfemfem =
+                    if femfem.contains('ё') {
+                      femfem.replace('ё', "е")
+                    } else {
+                      femfem.to_string()
+                    };
                   dict.push(femfemfem.clone());
                   fem_index += 1;
                   i
                 };
               if lfemm {
                 for w in other.iter() {
-                  let ww: String;
-                  if w.contains('ё') {
-                    ww = w.replace('ё', "е");
-                  } else {
-                    ww = w.to_string();
-                  }
+                  let ww =
+                    if w.contains('ё') {
+                      w.replace('ё', "е")
+                    } else {
+                      w.to_string()
+                    };
                   if let Some(mut f) = map.get_mut(&ww) {
                     if lem < f.lemma {
                       f.fem = fem_index;
