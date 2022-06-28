@@ -41,8 +41,8 @@ impl Kathoey {
                       , extreme: bool ) -> Option<String> {
     if let Some(result) = self.fem(slice, extreme) {
       Some(result)
-    } else if slice.contains('е') {
-      let yo: String = slice.replace('е', "ё");
+    } else if slice.contains('ё') {
+      let yo: String = slice.replace('ё', "е");
       self.fem(&yo, extreme)
     } else {
       None
