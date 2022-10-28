@@ -12,7 +12,6 @@ use std::collections::HashSet;
 static SWORDS: &[&str] = &["он", "оно", "они", "ты", "вы", "мы"];
 pub static SEPARATORS: [char; 10] = [' ',',','.',';',':','!','?','_','\n','\r'];
 
-#[allow(clippy::unnecessary_unwrap)]
 impl Kathoey {
   pub fn load(bin: &str) -> anyhow::Result<Kathoey> {
     let mut bin_file: std::fs::File = std::fs::File::open(bin)?;
@@ -94,18 +93,18 @@ impl Kathoey {
         let ipos: Option<usize> = lwords.iter().position(|&w| w == "я");
         let opos: Option<usize> = lwords.iter().position(|&w| w == *o);
         if ipos.is_some() && opos.is_some() {
-          let ip: usize = ipos.unwrap();
-          let op: usize = opos.unwrap();
+          let ip: usize = ipos.unwrap_or_default();
+          let op: usize = opos.unwrap_or_default();
           if ip > op {
             let pos: usize = lwords[0..ip].join(" ").len();
             let (first, last) = slice.split_at(pos);
             let fem_first: String = self.feminize(first);
-            format!("{}{}", fem_first, self.process_sentance(last, false))
+            format!("{fem_first}{}", self.process_sentance(last, false))
           } else {
             let pos: usize = lwords[0..op].join(" ").len();
             let (first, last) = slice.split_at(pos);
             let fem_last = self.feminize(last);
-            format!("{}{}", self.process_sentance(first, false), fem_last)
+            format!("{}{fem_last}", self.process_sentance(first, false))
           }
         } else {
           self.process_sentance(slice, false)
@@ -125,12 +124,12 @@ impl Kathoey {
   }
   pub fn print_this(&self) {
     for (kk, vv) in self.map.iter() {
-      println!("{} -> {}", kk, vv.fem);
+      println!("{kk} -> {}", vv.fem);
     }
   }
   pub fn save(&self, fname: &str) -> anyhow::Result<()> {
     let mut bin_file: std::fs::File = std::fs::File::create(fname)?;
-    bincode::encode_into_std_write( &self
+    bincode::encode_into_std_write( self
                                   , &mut bin_file
                                   , bincode::config::standard() )?;
     Ok(())

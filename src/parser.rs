@@ -11,10 +11,10 @@ pub fn parse_xml(text: &str) -> anyhow::Result<Kathoey> {
   let mut lfemm = false;
   let mut addvr = false;
   let mut addot = true;
-  let mut word: &str = "";
-  let mut mbfem: &str = "";
-  let mut femfem: &str = "";
-  let mut other: Vec<&str> = vec![];
+  let mut word: &str    = "";
+  let mut mbfem: &str   = "";
+  let mut femfem: &str  = "";
+  let mut other: Vec<&str>  = vec![];
   let mut dict: Vec<String> = vec![];
   let mut temp_dict: HashMap<&str, usize> = HashMap::new();
   let mut fem_index : usize = 0;
