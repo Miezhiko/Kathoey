@@ -14,3 +14,9 @@ Cargo.lock
 
 # Exported
 dict.bin
+
+# hake
+hake
+*.hi
+*.o
+
