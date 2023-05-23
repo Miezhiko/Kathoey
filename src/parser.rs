@@ -124,9 +124,9 @@ pub fn parse_xml(text: &str) -> anyhow::Result<Kathoey> {
                     } else {
                       w.to_string()
                     };
-                  if let Some(mut f) = map.get_mut(&ww) {
+                  if let Some(f) = map.get_mut(&ww) {
                     if lem < f.lemma {
-                      f.fem = fem_index;
+                      f.fem   = fem_index;
                       f.lemma = lem;
                     }
                   } else {
